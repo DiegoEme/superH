@@ -10,7 +10,7 @@ export class HeroesService {
 
   constructor(private http: HttpClient) { }
 
-  getHeroes(){
+  getHeroes():  Observable<Heroe[]>{
     return this.http.get<Heroe[]>("http://localhost:3000/heroes")
   }
 
@@ -20,5 +20,9 @@ export class HeroesService {
 
   getSugerencias(termino: string): Observable<Heroe[]>{
     return this.http.get<Heroe[]>(`http://localhost:3000/heroes?q=${termino}&_limit=6`)
+  }
+
+  agregarHeroe(heroe:Heroe): Observable<Heroe>{
+    return this.http.post<Heroe>("http://localhost:3000/heroes", heroe)
   }
 }

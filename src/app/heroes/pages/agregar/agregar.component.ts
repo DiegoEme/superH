@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Heroe, Publisher } from '../../interfaces/heroe.interface';
 import { HeroesService } from '../../services/heroes.service';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-agregar',
@@ -30,15 +32,28 @@ export class AgregarComponent implements OnInit {
     first_appearance: ""
   }
 
-  constructor(private heroesService: HeroesService) { }
+  constructor(private heroesService: HeroesService,
+              private activatedRoute: ActivatedRoute,
+              private router: Router) { }
 
   ngOnInit(): void {
+    this.activatedRoute.params.
+      pipe(switchMap(({id}) => this.heroesService.getHeroePorId(id))).
+      subscribe((heroe) => this.heroe = heroe)
   }
 
   guardar(){
     if(this.heroe.superhero.trim().length === 0) return;
     
-      this.heroesService.agregarHeroe(this.heroe).subscribe(res => console.log("res",res))
+    //Si el heroe tiene id, significa que ya ha sido creado en la base de datos
+    //entonces no se debe crear uno nuevo sino actualizarlo
+    if(this.heroe.id){
+      this.heroesService.actualizarHeroe(this.heroe)
+      .subscribe(heroe => console.log("actualizando", heroe) )
+    } else {
+      this.heroesService.agregarHeroe(this.heroe)
+      .subscribe(heroe => this.router.navigate(["/heroes/editar", heroe.id]))
+    }
   }
 
 }
